@@ -92,3 +92,5 @@ Output string: "Test string: Hello, size: %d"
 ```
 
 If an invalid `SyncFrame` or `Message` structure is found, the structure and remaining `page` data should be skipped.
+
+![img.png](img.png)

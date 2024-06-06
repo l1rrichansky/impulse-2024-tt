@@ -1,4 +1,4 @@
-import json
+import json, re
 
 
 with open('input.json') as fd:
@@ -18,8 +18,45 @@ def check_crc8(byte_array):
     return crc
 
 
+def extract_specifiers(c_format):
+    specifier_pattern = re.compile(r"%[0-9]*[csdupxX]|%[0-9]*lld|%[0-9]*llu")
+    cleaned_specifiers = [re.sub(r'\d', '', specifier) for specifier in specifier_pattern.findall(c_format)]
+    return cleaned_specifiers
+
+
 def get_message(data, message):
-    print("\033[34m{}\033[0m".format(f"\t\t\tmessage: {message}"))
+    variables = {
+        1: ['%c'],
+        4: ['%s', '%d', '%u', '%x', '%X'],
+        8: ['%lld', '%llu']
+    }
+    if not data:
+        print("\033[34m{}\033[0m".format(f"\t\t\tmessage: {message}"))
+    else:
+        specifiers = extract_specifiers(message)
+        index = 0
+        values = []
+        for j in specifiers:
+            for i in variables:
+                if j in variables[i]:
+                    summ = 0
+                    if j == '%s':
+                        for k, j1 in enumerate(data[index:index+i]):
+                            summ += j1 * 256 ** k
+                        try:
+                            mes = a[str(summ)]
+                        except KeyError:
+                            mes = 'n/a'
+                        values.append(mes)
+                    elif j == '%c':
+                        values.append(chr(data[index]))
+                    else:
+                        for k, j1 in enumerate(data[index:index+i]):
+                            summ += j1 * 256 ** k
+                        values.append(summ)
+                    index += i
+        print("\033[34m{}\033[0m".format("\t\t\t"+message % tuple(values)))
+
 
 def messages_log(page):
     offset = 10

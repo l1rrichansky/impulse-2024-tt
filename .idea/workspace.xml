@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1343a10a-79d1-4c6f-b25a-6f088cfb8999" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/decoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Impulse 2024 DAASDE Python Test.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/decoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/decoder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
