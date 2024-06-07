@@ -1,6 +1,8 @@
 import json, re
-import sys
-import argparse
+
+with open('input.json') as fd:
+    a = json.load(fd)
+
 
 def count_bytes(bytes_array):
     value = 0
@@ -14,6 +16,25 @@ def message_search(value):
         return a[str(value)]
     else:
         return False
+
+
+def check_crc8(sync_frame):
+    byte_array = sync_frame[1:]
+    crc = 0
+    for byte in byte_array:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 0x80:
+                crc = (crc << 1) ^ 0x07
+            else:
+                crc <<= 1
+            crc &= 0xFF
+    if crc == sync_frame[0]:
+        print("\033[32m{}\033[0m".format("\t\t\tCRC8 check passed."))
+    else:
+        print("\033[31m{}\033[0m".format(
+            f"\t\t\tCRC8 check failed. Calculated: {crc}, Received: {sync_frame[0]}"))
+    return 0
 
 
 def format_with_defaults(format_string, args):
@@ -44,12 +65,11 @@ def get_message(data, stringaddress):
         '%c': 2, '%s': 4, '%d': 4, '%u': 4, '%x': 4, '%X': 4, '%lld': 8, '%llu': 8
     }
     if not message:
-        return 0
+        print("\033[33m{}\033[0m".format(f"\t\t\tmessage: n/a; stringaddress_value: {stringaddress_value}"))
     else:
         specifiers, def_specifiers = extract_specifiers(message)
         ofs = 0
         values = []
-
         for j in specifiers:
             if j in variables:
                 try:
@@ -68,45 +88,47 @@ def get_message(data, stringaddress):
         if len(values) < len(specifiers):
             formatted_output = format_with_defaults(message, tuple(values))
         else:
-            formatted_output = (message % tuple(values))
-        return formatted_output
+            formatted_output = ("\t\t\t" + message % tuple(values))
+        print("\033[34m{}\033[0m".format(formatted_output))
+        # stdout stdin stderr
+        ###
+        # знак плюса минуса
 
 
-def messages_log(page, stv):
+def messages_log(page):
     offset = 10
     while offset < 512:
+        crc8 = page[offset]
         size = page[offset + 1]
         if size == 0:
+            print("\033[33m{}\033[0m".format(f"\t\t\tsize = 0; remaining: {page[offset:]}"))
             break
         else:
             stringAddress = page[offset + 2:offset + 6]
             timeOffSet = page[offset + 6:offset + 10]
             timeOffSetValue = count_bytes(timeOffSet)
             data = page[offset + 10:offset + 10 + (size - 10)]
-            formated_message = get_message(data, stringAddress)
-            if formated_message == 0:
-                print(("%010u" % stv)+"."+("%06u" % timeOffSetValue)+' '+f"message: n/a; stringaddress_value: {count_bytes(stringAddress)} data: {data}", file=sys.stderr)
-                break  # move to the next page
-            else:
-                print(("%010u" % stv)+"."+("%06u" % timeOffSetValue)+' '+formated_message, file=sys.stdout)
+            print(
+                f"\t\tMessage\n\t\t\tOFFSET: {offset}\n\t\t\tcrc8: {crc8}\n\t\t\tsize: {size}\n\t\t\tstringAddress: {stringAddress}\n\t\t\ttimeOffSet: "
+                f"{timeOffSet}\n\t\t\tdata: {data}"+("\n\t\t\ttimeOffSetValue: %06u" % timeOffSetValue))
+            get_message(data, stringAddress)
+            check_crc8(page[offset:offset + size])
         offset += size
 
 
 def sync_log(page):
+    sync_size = page[1]
+    sync_stringAddr = page[2:6]
     sync_timestamp = page[6:10]
     sync_timestam_value = count_bytes(sync_timestamp)
-    messages_log(page, sync_timestam_value)
+    print(
+        f'SyncFrame\n\tcrc8: {page[0]}\n\tsize: {sync_size}\n\tsync_stringaddr: {sync_stringAddr}\n\tsync_timestamp: {sync_timestamp}'
+    + ("\n\tsync_timestam_value: %010u" % sync_timestam_value))
+    check_crc8(page[:10])
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('binary_file', type=str, help='Path to the binary file')
-    parser.add_argument('-m', '--json_file', type=str, required=True, help='Path to the JSON file')
-    args = parser.parse_args()
-    with open(args.json_file) as fd:
-        a = json.load(fd)
-    with open(args.binary_file, 'rb') as f:
-        c = [i for i in f.read()]
-        for i in range(len(c) // 512):
-            sync_log(c[512 * i:512 * (i + 1)])
-
+with open('input.bin', 'rb') as f:
+    c = [i for i in f.read()]
+    for i in range(len(c) // 512):
+        sync_log(c[512 * i:512 * (i + 1)])
+        messages_log(c[512 * i:512 * (i + 1)])
