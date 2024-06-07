@@ -1,6 +1,6 @@
 import json, re
 
-with open('input.json') as fd:
+with open('../input.json') as fd:
     a = json.load(fd)
 
 
@@ -127,7 +127,7 @@ def sync_log(page):
     check_crc8(page[:10])
 
 
-with open('input.bin', 'rb') as f:
+with open('../input.bin', 'rb') as f:
     c = [i for i in f.read()]
     for i in range(len(c) // 512):
         sync_log(c[512 * i:512 * (i + 1)])
