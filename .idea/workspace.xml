@@ -7,9 +7,7 @@
     <list default="true" id="1343a10a-79d1-4c6f-b25a-6f088cfb8999" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/decoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/decoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/decoder_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/old versions/decoder_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/err.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/img.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/input.json" beforeDir="false" afterPath="$PROJECT_DIR$/input.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,25 +31,30 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2hSkLeyzR7HZGViRnkwYB3myXGS" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Python tests for tests.test.executor": "Run",
-    "Python tests.Python tests in tests.py.executor": "Run",
-    "Python.decoder.executor": "Run",
-    "Python.decoder_old.executor": "Run",
-    "Python.interacter.executor": "Run",
-    "Python.test.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "K:/PyProjects/impulse"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests for tests.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in sync.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in sync_page_proverka_nafig.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in tests.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.decoder.executor&quot;: &quot;Run&quot;,
+    &quot;Python.decoder_old.executor&quot;: &quot;Run&quot;,
+    &quot;Python.interacter.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sync.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;K:/PyProjects/impulse&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="K:\PyProjects\impulse" />
@@ -61,7 +64,7 @@
       <recent name="K:\PyProjects\impulse" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.decoder">
+  <component name="RunManager">
     <configuration name="decoder" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="impulse" />
       <option name="ENV_FILES" value="" />

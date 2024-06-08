@@ -12,6 +12,7 @@ def count_bytes(bytes_array):
 
 
 def message_search(value):
+    js = get_json(args.json_file)
     if str(value) in js:
         return js[str(value)]
     else:
@@ -57,12 +58,13 @@ def get_message(data, stringaddress):
                     sliced = data[ofs:ofs + variables[j]]
                     if sliced:
                         if j == '%s':
-                            value = count_bytes(sliced)
-                            word = message_search(value)
-                            if word:
-                                values.append(word)
-                            else:
-                                values.append('[n/a]')
+                            if sliced:
+                                value = count_bytes(sliced)
+                                word = message_search(value)
+                                if word:
+                                    values.append(word)
+                                else:
+                                    values.append('[n/a]')
                         elif j == '%c':
                             values.append(chr(data[ofs]))
                         else:
@@ -82,23 +84,6 @@ def get_message(data, stringaddress):
         return formatted_output
 
 
-def check_crc8(sync_frame):
-    byte_array = sync_frame[1:]
-    crc = 0
-    for byte in byte_array:
-        crc ^= byte
-        for _ in range(8):
-            if crc & 0x80:
-                crc = (crc << 1) ^ 0x07
-            else:
-                crc <<= 1
-            crc &= 0xFF
-    if crc == sync_frame[0]:
-        return True
-    else:
-        return False
-
-
 def messages_log(page, stv):
     offset = 10
     while offset < 512:
@@ -110,25 +95,18 @@ def messages_log(page, stv):
             timeOffSet = page[offset + 6:offset + 10]
             timeOffSetValue = count_bytes(timeOffSet)
             data = page[offset + 10:offset + 10 + (size - 10)]
-            if count_bytes(stringAddress) != 0:
-                formated_message = get_message(data, stringAddress)
-                if not check_crc8(page[offset:offset+size]):
-                    print(("Error: CRC8 check failed. Invalid structure. %010u.%06u " % (stv, timeOffSetValue))+f"message: [n/a]; StringAddressValue: "
-                                                                          f"{count_bytes(stringAddress)} data: "
-                                                                          f"{data}", file=sys.stderr)
-                    if args.breakloop == 1:
-                        break  # move to the next page
-                    else:
-                        pass
-                else:
-                    print(("%010u.%06u " % (stv, timeOffSetValue))+formated_message, file=sys.stderr)
+            formated_message = get_message(data, stringAddress)
+            if formated_message == 0:
+                print(("Error: %010u.%06u " % (stv, timeOffSetValue))+f"message: n/a; StringAddressValue: "
+                                                                      f"{count_bytes(stringAddress)} data: "
+                                                                      f"{data}", file=sys.stderr)
+                break  # move to the next page
             else:
-                stv = timeOffSetValue  # if SyncFrame structure is found then changing TimeStampValue
-                pass
+                print(("%010u.%06u " % (stv, timeOffSetValue))+formated_message, file=sys.stdout)
         offset += size
 
 
-def first_sync_log(page):
+def sync_log(page):
     sync_timestamp = page[6:10]
     sync_timestamp_value = count_bytes(sync_timestamp)
     messages_log(page, sync_timestamp_value)
@@ -148,10 +126,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('binary_file', type=str, help='Path to the binary file')
     parser.add_argument('-m', '--json_file', type=str, required=True, help='Path to the JSON file')
-    parser.add_argument('-brl', '--breakloop', type=int, default=1, help='Skip to the next page if error occurred')
     args = parser.parse_args()
-    bin_bytes = [i for i in get_bin(args.binary_file)]
-    js = get_json(args.json_file)
-    for i in range(len(bin_bytes) // 512):
-        print(f"Page {i+1} reading...", file=sys.stdout)
-        first_sync_log(bin_bytes[512 * i:512 * (i + 1)])
+    bin_bytes = [int(i) for i in "21 10 0 0 0 0 86 177 69 102 86 18 0 0 52 1 131 123 4 0 4 0 52 1 66 4 0 52 1 65".split()]
+    if len(bin_bytes) < 512:
+        sync_log(bin_bytes)
+    else:
+        for i in range(len(bin_bytes) // 512):
+            print(f"Page {i+1} reading...", file=sys.stdout)
+            sync_log(bin_bytes[512 * i:512 * (i + 1)])
