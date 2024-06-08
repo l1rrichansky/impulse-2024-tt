@@ -93,4 +93,9 @@ Output string: "Test string: Hello, size: %d"
 
 If an invalid `SyncFrame` or `Message` structure is found, the structure and remaining `page` data should be skipped.
 
-![img.png](img.png)
+## My solutions
+
+### 06.06.24 version
+![img](https://github.com/l1rrichansky/impulse-summer-2024-DAASDE/assets/85824228/d3d01825-fae1-4e1e-a4bb-449a27e6a3d5)
+### 07.06.24 version
+![image](https://github.com/l1rrichansky/impulse-summer-2024-DAASDE/assets/85824228/d796c180-bdac-420d-89d5-6a4e209d7612)
