@@ -40,7 +40,7 @@ def extract_specifiers(c_format):
     return cleaned_specifiers, specifiers
 
 
-def get_message(data, stringaddress):
+def get_message(data, stringaddress, tos, tsv):
     stringaddress_value = count_bytes(stringaddress)
     message = message_search(stringaddress_value)
     variables = {
@@ -70,15 +70,18 @@ def get_message(data, stringaddress):
                         else:
                             value = count_bytes(data[ofs:ofs + variables[j]])
                             values.append(value)
+                        ofs += variables[j]
                     else:
-                        print("Warning: Too much values in data", file=sys.stderr, end=' / ')
                         break
-                    ofs += variables[j]
                 except IndexError:
                     break
+
         if len(values) < len(specifiers):
-            print("Warning: Not enough values in data", file=sys.stderr, end=' / ')
+            print("%010u.%06u Warning: Not enough values in data" % (tsv, tos), file=sys.stderr)
             formatted_output = format_with_defaults(message, tuple(values))
+        elif data[ofs:]:
+            print("%010u.%06u Warning: Too much values in data" % (tsv, tos), file=sys.stderr)
+            formatted_output = (message % tuple(values))
         else:
             formatted_output = (message % tuple(values))
         return formatted_output
@@ -95,7 +98,7 @@ def messages_log(page, stv):
             timeOffSet = page[offset + 6:offset + 10]
             timeOffSetValue = count_bytes(timeOffSet)
             data = page[offset + 10:offset + 10 + (size - 10)]
-            formated_message = get_message(data, stringAddress)
+            formated_message = get_message(data, stringAddress, timeOffSetValue, stv)
             if formated_message == 0:
                 print(("Error: %010u.%06u " % (stv, timeOffSetValue))+f"message: n/a; StringAddressValue: "
                                                                       f"{count_bytes(stringAddress)} data: "
@@ -127,7 +130,7 @@ if __name__ == "__main__":
     parser.add_argument('binary_file', type=str, help='Path to the binary file')
     parser.add_argument('-m', '--json_file', type=str, required=True, help='Path to the JSON file')
     args = parser.parse_args()
-    bin_bytes = [int(i) for i in "21 10 0 0 0 0 86 177 69 102 86 18 0 0 52 1 131 123 4 0 4 0 52 1 66 4 0 52 1 65".split()]
+    bin_bytes = [int(i) for i in "21 10 0 0 0 0 86 177 69 102 86 23 0 0 52 1 131 123 4 0 4 0 52 1 4 0 52 1 65 65 65 65 65".split()]
     if len(bin_bytes) < 512:
         sync_log(bin_bytes)
     else:

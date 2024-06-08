@@ -1,5 +1,5 @@
 {
-    "20185088": "%s %s %d %c initialized!",
+    "20185088": "%s %s initialized!",
     "20185092": "<inf>",
     "20185096": "QSPI",
     "20185100": "%s %s:  FLASH_Init",

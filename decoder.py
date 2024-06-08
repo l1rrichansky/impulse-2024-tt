@@ -39,7 +39,7 @@ def extract_specifiers(c_format):
     return cleaned_specifiers, specifiers
 
 
-def get_message(data, stringaddress):
+def get_message(data, stringaddress, tos, tsv):
     stringaddress_value = count_bytes(stringaddress)
     message = message_search(stringaddress_value)
     variables = {
@@ -57,26 +57,30 @@ def get_message(data, stringaddress):
                     sliced = data[ofs:ofs + variables[j]]
                     if sliced:
                         if j == '%s':
-                            value = count_bytes(sliced)
-                            word = message_search(value)
-                            if word:
-                                values.append(word)
-                            else:
-                                values.append('[n/a]')
+                            if sliced:
+                                value = count_bytes(sliced)
+                                word = message_search(value)
+                                if word:
+                                    values.append(word)
+                                else:
+                                    values.append('[n/a]')
                         elif j == '%c':
                             values.append(chr(data[ofs]))
                         else:
                             value = count_bytes(data[ofs:ofs + variables[j]])
                             values.append(value)
+                        ofs += variables[j]
                     else:
-                        print("Warning: Too much values in data", file=sys.stderr, end=' / ')
                         break
-                    ofs += variables[j]
                 except IndexError:
                     break
+
         if len(values) < len(specifiers):
-            print("Warning: Not enough values in data", file=sys.stderr, end=' / ')
+            print("%010u.%06u Warning: Not enough values in data" % (tsv, tos), file=sys.stderr)
             formatted_output = format_with_defaults(message, tuple(values))
+        elif data[ofs:]:
+            print("%010u.%06u Warning: Too much values in data" % (tsv, tos), file=sys.stderr)
+            formatted_output = (message % tuple(values))
         else:
             formatted_output = (message % tuple(values))
         return formatted_output
@@ -111,7 +115,7 @@ def messages_log(page, stv):
             timeOffSetValue = count_bytes(timeOffSet)
             data = page[offset + 10:offset + 10 + (size - 10)]
             if count_bytes(stringAddress) != 0:
-                formated_message = get_message(data, stringAddress)
+                formated_message = get_message(data, stringAddress, timeOffSetValue, stv)
                 if not check_crc8(page[offset:offset+size]):
                     print(("Error: CRC8 check failed. Invalid structure. %010u.%06u " % (stv, timeOffSetValue))+f"message: [n/a]; StringAddressValue: "
                                                                           f"{count_bytes(stringAddress)} data: "
