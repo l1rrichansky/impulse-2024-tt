@@ -4,10 +4,31 @@ import re
 import sys
 
 
-def count_bytes(bytes_array):
+def tc(value):
+    value -= 1
+    abs_rev_bin_value = bin(value)[3:]
+    abs_bin_value = ''
+    for i in abs_rev_bin_value:
+        if i == '0':
+            abs_bin_value += '1'
+        else:
+            abs_bin_value += '0'
+    value = -int(abs_bin_value, 2)
+    return value
+
+
+def count_bytes(bytes_array, check=''):
     value = 0
     for k, j1 in enumerate(bytes_array):
         value += j1 * 256 ** k
+    bin_value = bin(value)[2:]
+    if (check == '%d' and len(bin_value) == 32) or (check == '%lld' and len(bin_value) == 64):
+        if args.twoscompl == 1:
+            value = tc(value)
+        else:
+            value = -int(bin_value[1:], 2)
+    else:
+        pass
     return value
 
 
@@ -51,28 +72,25 @@ def get_message(data, stringaddress, tos, tsv):
         specifiers, def_specifiers = extract_specifiers(message)
         ofs = 0
         values = []
-        for j in specifiers:
+        for k, j in enumerate(specifiers):
             if j in variables:
-                try:
-                    sliced = data[ofs:ofs + variables[j]]
-                    if sliced:
-                        if j == '%s':
-                            if sliced:
-                                value = count_bytes(sliced)
-                                word = message_search(value)
-                                if word:
-                                    values.append(word)
-                                else:
-                                    values.append('[n/a]')
-                        elif j == '%c':
-                            values.append(chr(data[ofs]))
-                        else:
-                            value = count_bytes(data[ofs:ofs + variables[j]])
-                            values.append(value)
-                        ofs += variables[j]
+                sliced = data[ofs:ofs + variables[j]]
+                if sliced:
+                    if j == '%s':
+                        if sliced:
+                            value = count_bytes(sliced)
+                            word = message_search(value)
+                            if word:
+                                values.append(word)
+                            else:
+                                values.append('[n/a]')
+                    elif j == '%c':
+                        values.append(chr(data[ofs]))
                     else:
-                        break
-                except IndexError:
+                        value = count_bytes(sliced, def_specifiers[k])
+                        values.append(value)
+                    ofs += variables[j]
+                else:
                     break
 
         if len(values) < len(specifiers):
@@ -117,9 +135,10 @@ def messages_log(page, stv):
             if count_bytes(stringAddress) != 0:
                 formated_message = get_message(data, stringAddress, timeOffSetValue, stv)
                 if not check_crc8(page[offset:offset+size]):
-                    print(("Error: CRC8 check failed. Invalid structure. %010u.%06u " % (stv, timeOffSetValue))+f"message: [n/a]; StringAddressValue: "
-                                                                          f"{count_bytes(stringAddress)} data: "
-                                                                          f"{data}", file=sys.stderr)
+                    print(("Error: CRC8 check failed. Invalid structure. %010u.%06u " % (stv, timeOffSetValue)) +
+                          f"message: {formated_message}; StringAddressValue: "
+                          f"{count_bytes(stringAddress)} data: "
+                          f"{data}", file=sys.stderr)
                     if args.breakloop == 1:
                         break  # move to the next page
                     else:
@@ -153,6 +172,7 @@ if __name__ == "__main__":
     parser.add_argument('binary_file', type=str, help='Path to the binary file')
     parser.add_argument('-m', '--json_file', type=str, required=True, help='Path to the JSON file')
     parser.add_argument('-brl', '--breakloop', type=int, default=1, help='Skip to the next page if error occurred')
+    parser.add_argument('-tc', '--twoscompl', type=int, default=1, help='Numbers in twos-complement number system')
     args = parser.parse_args()
     bin_bytes = [i for i in get_bin(args.binary_file)]
     js = get_json(args.json_file)

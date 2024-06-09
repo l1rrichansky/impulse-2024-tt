@@ -54,26 +54,23 @@ def get_message(data, stringaddress, tos, tsv):
         values = []
         for j in specifiers:
             if j in variables:
-                try:
-                    sliced = data[ofs:ofs + variables[j]]
-                    if sliced:
-                        if j == '%s':
-                            if sliced:
-                                value = count_bytes(sliced)
-                                word = message_search(value)
-                                if word:
-                                    values.append(word)
-                                else:
-                                    values.append('[n/a]')
-                        elif j == '%c':
-                            values.append(chr(data[ofs]))
-                        else:
-                            value = count_bytes(data[ofs:ofs + variables[j]])
-                            values.append(value)
-                        ofs += variables[j]
+                sliced = data[ofs:ofs + variables[j]]
+                if sliced:
+                    if j == '%s':
+                        if sliced:
+                            value = count_bytes(sliced)
+                            word = message_search(value)
+                            if word:
+                                values.append(word)
+                            else:
+                                values.append('[n/a]')
+                    elif j == '%c':
+                        values.append(chr(data[ofs]))
                     else:
-                        break
-                except IndexError:
+                        value = count_bytes(sliced)
+                        values.append(value)
+                    ofs += variables[j]
+                else:
                     break
 
         if len(values) < len(specifiers):
@@ -130,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument('binary_file', type=str, help='Path to the binary file')
     parser.add_argument('-m', '--json_file', type=str, required=True, help='Path to the JSON file')
     args = parser.parse_args()
-    bin_bytes = [int(i) for i in "21 10 0 0 0 0 86 177 69 102 86 23 0 0 52 1 131 123 4 0 4 0 52 1 4 0 52 1 65 65 65 65 65".split()]
+    bin_bytes = [int(i) for i in "21 10 0 0 0 0 86 177 69 102 86 14 0 0 52 1 131 123 4 0 4 0 52 1".split()]
     if len(bin_bytes) < 512:
         sync_log(bin_bytes)
     else:
